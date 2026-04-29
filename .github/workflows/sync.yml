@@ -11,20 +11,17 @@ jobs:
 
     steps:
       - name: Code checkout karo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Python setup karo
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Dependencies install karo
-        run: pip install requests
+        run: pip install requests python-dotenv
 
       - name: Sync chalao
         env:
           SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
-        run: |
-          # Token inject karo
-          sed -i "s/YOUR_ACCESS_TOKEN_HERE/$SHOPIFY_TOKEN/" strawberry_sync.py
-          python strawberry_sync.py
+        run: python strawberry_sync.py
