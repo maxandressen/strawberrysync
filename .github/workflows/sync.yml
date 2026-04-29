@@ -1,0 +1,30 @@
+name: Strawberry → Shopify Sync (Har 6 Ghante)
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # Har 6 ghante mein chalega (12am, 6am, 12pm, 6pm UTC)
+  workflow_dispatch:          # Manual run ka option bhi hai
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code checkout karo
+        uses: actions/checkout@v3
+
+      - name: Python setup karo
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Dependencies install karo
+        run: pip install requests
+
+      - name: Sync chalao
+        env:
+          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+        run: |
+          # Token inject karo
+          sed -i "s/YOUR_ACCESS_TOKEN_HERE/$SHOPIFY_TOKEN/" strawberry_sync.py
+          python strawberry_sync.py
