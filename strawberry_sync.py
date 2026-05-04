@@ -4,7 +4,9 @@ import io
 import time
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
+
 # ============================================================
 # APNI DETAILS YAHAN DAALO
 # ============================================================
@@ -51,7 +53,7 @@ def get_existing_products():
     url = f"{API_BASE}/products.json?limit=250"
     
     while url:
-        response = requests.get(url, headers=HEADERS)
+        response = requests.get(url, headers=HEADERS, timeout=30)
         response.raise_for_status()
         data = response.json()
         
@@ -140,20 +142,23 @@ def update_inventory(inventory_item_id, location_id, quantity):
 
 
 def sync_products():
-    """Main sync function"""
-    print("\n🚀 Strawberry → Shopify Sync Shuru...\n")
+    """Main sync function (Limited to first 10 products)"""
+    print("\n🚀 Strawberry → Shopify Sync Shuru (LIMIT: 10 Products)...\n")
     
     # Data fetch karo
     csv_products = fetch_csv()
     location_id = get_location_id()
     existing_products = get_existing_products()
     
+    # Slicing the list to only 10 products
+    limited_list = csv_products[:10]
+    
     # Counters
     created = 0
     updated = 0
     failed = 0
     
-    for i, row in enumerate(csv_products):
+    for i, row in enumerate(limited_list):
         sku = str(row.get("product_id", "")).strip()
         if not sku:
             continue
@@ -166,7 +171,7 @@ def sync_products():
         
         title = f"{row.get('brand', '')} {row.get('name', '')}".strip()
         
-        print(f"[{i+1}/{len(csv_products)}] {title[:50]}...")
+        print(f"[{i+1}/{len(limited_list)}] {title[:50]}...")
         
         if sku in existing_products:
             # Product exist karta hai — sirf inventory update karo
@@ -198,7 +203,7 @@ def sync_products():
         time.sleep(0.5)
     
     print(f"\n{'='*50}")
-    print(f"✅ Sync Complete!")
+    print(f"✅ Sync Complete (Limit 10 processed)!")
     print(f"   🆕 Naye Products: {created}")
     print(f"   🔄 Updated: {updated}")
     print(f"   ❌ Failed: {failed}")
